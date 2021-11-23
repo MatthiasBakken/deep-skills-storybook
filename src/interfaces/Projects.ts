@@ -12,5 +12,6 @@ export interface IProject {
   isApplicationOpen: boolean
   details: Record<string, string>[]
   applicants: string[]
+  totalBudget: string
   taskSets: ITaskSet[]
 }

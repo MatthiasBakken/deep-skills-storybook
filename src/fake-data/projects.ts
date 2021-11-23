@@ -11,6 +11,7 @@ export const generateProject = (): IProject => ({
   id: faker.datatype.uuid(),
   isApplicationOpen: true,
   url: faker.internet.url(),
+  totalBudget: faker.finance.amount(),
   applicants: [
     faker.image.avatar(),
     faker.image.avatar(),

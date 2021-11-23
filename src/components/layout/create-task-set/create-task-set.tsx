@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useState } from 'react'
 import { RoundedBox } from '../../data-display/rounded-box/rounded-box'
-import { Box, Button, Collapse, Text, useDisclosure } from '@chakra-ui/react'
+import { Box, Button, Collapse, Editable, EditableInput, EditablePreview, Text, useDisclosure } from '@chakra-ui/react'
 import { AddIcon, ArrowDownIcon, ArrowUpIcon } from '@chakra-ui/icons'
 import { ITask, ITaskSet } from '../../../interfaces'
 import { TaskItem } from '../task-item/task-item'
@@ -13,34 +13,34 @@ import { pluralise } from '../../../utils/texts';
 
 export interface TaskSetProps {
   title: string
+  saveButtonText?: string
+  deleteButtonText?: string
   existingTaskSet?: ITaskSet
-  onSaveTaskSet: (taskSet: ITaskSet) => void
+  onSave: (taskSet: ITaskSet) => void
+  onDelete: () => void
 }
 
 export const CreateTaskSet: React.FC<TaskSetProps> = ({
-  onSaveTaskSet,
-  title,
-  existingTaskSet
-}) => {
-  const [processStarted, setProcessStarted] = useState(true)
+                                                        onSave,
+                                                        saveButtonText = 'Save task set',
+                                                        deleteButtonText = 'Delete task set',
+                                                        title,
+                                                        existingTaskSet,
+                                                        onDelete
+                                                      }) => {
   const [taskSet, setTaskSet] = useState<ITaskSet>({
     title: '',
     tasks: []
   })
   const { isOpen, onToggle } = useDisclosure()
 
+  const handleOnTitleChange = (title: string) => {
+    setTaskSet({ ...taskSet, title })
+  }
+
   const handleSaveTaskSet = () => {
-    setProcessStarted(false)
+    onSave(taskSet)
     onToggle()
-    onSaveTaskSet(taskSet)
-  }
-
-  const handleCreateTaskTest = () => {
-    setProcessStarted(true)
-  }
-
-  const handleChangeTitle = (event: ChangeEvent<HTMLInputElement>) => {
-    setTaskSet({ ...taskSet, title: event.target.value })
   }
 
   const handleAddTask = (task: ITask) => {
@@ -70,35 +70,30 @@ export const CreateTaskSet: React.FC<TaskSetProps> = ({
         justifyContent='space-between'
         flexDirection={{ base: 'column', md: 'row' }}
       >
-        {!processStarted && !taskSet.title && (
+        <>
           <Box
             display='flex'
             justifyContent='space-between'
             alignItems='center'
-            flex='1 0 auto'
-            onClick={handleCreateTaskTest}
+            flex='0.1 0 auto'
+            mb={{ base: '12px', md: '0' }}
           >
-            <Text variant='heading.3' color='primary'>
-              Create a task set
-            </Text>
-            <AddIcon color='primary' />
-          </Box>
-        )}
-        {processStarted && (
-          <>
-            <Box
-              display='flex'
-              justifyContent='space-between'
-              flex='0.1 0 auto'
-              mb={{ base: '12px', md: '0' }}
+            <Editable
+              defaultValue='Untitled'
+              onChange={handleOnTitleChange}
+              color='white'
             >
-              <Text variant='heading.4' color='white'>
-                {title || 'Untitled'}
-              </Text>
-              <Text variant='heading.6' color='white'>
-                {taskSet.tasks.length} task{pluralise(taskSet.tasks.length)}
-              </Text>
-            </Box>
+              <EditablePreview />
+              <EditableInput />
+            </Editable>
+            <Text variant='heading.6' color='white'>
+              {taskSet.tasks.length} task{pluralise(taskSet.tasks.length)}
+            </Text>
+          </Box>
+          <Box display='flex' justifyContent='space-between' flex='0.1 0 auto'>
+            <Button variant='link' color='warning' onClick={onDelete}>
+              {deleteButtonText}
+            </Button>
             <Button
               onClick={onToggle}
               variant='link'
@@ -122,8 +117,8 @@ export const CreateTaskSet: React.FC<TaskSetProps> = ({
             >
               {isOpen ? 'Close' : 'Expand'}
             </Button>
-          </>
-        )}
+          </Box>
+        </>
       </RoundedBox>
       <Collapse in={isOpen} animateOpacity>
         <Box
@@ -138,11 +133,11 @@ export const CreateTaskSet: React.FC<TaskSetProps> = ({
             onDeleteTask={handleDeleteTask}
             tasks={taskSet.tasks}
           />
-        </Box>
-        <Box mt={'32px'} display='flex' justifyContent='flex-end'>
-          <Button onClick={handleSaveTaskSet} size='sm'>
-            Save task set
-          </Button>
+          <Box mt={'32px'} display='flex' justifyContent='flex-end'>
+            <Button onClick={handleSaveTaskSet} size='sm'>
+              {saveButtonText}
+            </Button>
+          </Box>
         </Box>
       </Collapse>
     </>
@@ -161,11 +156,11 @@ const INITIAL_TASK_VALUES = {
   description: ''
 }
 const Tasks: React.FC<TasksProps> = ({
-  onAddTask,
-  onEditTask,
-  onDeleteTask,
-  tasks
-}) => {
+                                       onAddTask,
+                                       onEditTask,
+                                       onDeleteTask,
+                                       tasks
+                                     }) => {
   const [openForm, setOpenForm] = useState(true)
   const [editItem, setEditItem] = useState('')
   const [initialValues, setInitialValues] = useState(INITIAL_TASK_VALUES)
@@ -240,7 +235,7 @@ const Tasks: React.FC<TasksProps> = ({
             })}
           >
             {() => (
-              <Form noValidate>
+              <>
                 <Box display='flex' justifyContent='space-between' mb='32px'>
                   <FormikInputControl
                     label='Task set title'
@@ -281,7 +276,7 @@ const Tasks: React.FC<TasksProps> = ({
                     Save task
                   </Button>
                 </Box>
-              </Form>
+              </>
             )}
           </Formik>
         </RoundedBox>
