@@ -35,6 +35,7 @@ export * from './components/layout/collapsable-task-set/collapsable-task-set'
 export * from './components/layout/profile-box/profile-box'
 export * from './components/layout/primary-card/primary-card'
 export * from './components/layout/admin-create-button/admin-create-button'
+export * from './components/layout/overview-sidebar/overview-sidebar'
 
 //icons
 export * from './icons'
